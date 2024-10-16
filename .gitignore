@@ -1,0 +1,11 @@
+# Binaries
+/bin/
+/pkg/
+/vendor/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
