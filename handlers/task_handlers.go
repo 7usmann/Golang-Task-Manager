@@ -13,7 +13,7 @@ import (
 
 // Get all tasks
 func GetTasks(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Conn.Query(context.Background(), "SELECT id, title, description, completed FROM tasks")
+	rows, err := db.Conn.Query(context.Background(), "SELECT id, title, description, completed, task_date, task_type FROM tasks")
 	if err != nil {
 		http.Error(w, "Failed to retrieve tasks", http.StatusInternalServerError)
 		return
@@ -23,7 +23,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 	var tasks []models.Task
 	for rows.Next() {
 		var task models.Task
-		err := rows.Scan(&task.ID, &task.Title, &task.Description, &task.Completed)
+		err := rows.Scan(&task.ID, &task.Title, &task.Description, &task.Completed, &task.TaskDate, &task.TaskType)
 		if err != nil {
 			http.Error(w, "Failed to scan task", http.StatusInternalServerError)
 			return
@@ -38,7 +38,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 func GetTask(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var task models.Task
-	err := db.Conn.QueryRow(context.Background(), "SELECT id, title, description, completed FROM tasks WHERE id = $1", params["id"]).Scan(&task.ID, &task.Title, &task.Description, &task.Completed)
+	err := db.Conn.QueryRow(context.Background(), "SELECT id, title, description, completed, task_date, task_type FROM tasks WHERE id = $1", params["id"]).Scan(&task.ID, &task.Title, &task.Description, &task.Completed, &task.TaskDate, &task.TaskType)
 	if err != nil {
 		http.Error(w, "Task not found", http.StatusNotFound)
 		return
@@ -57,8 +57,8 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert into PostgreSQL
-	query := `INSERT INTO tasks (title, description, completed) VALUES ($1, $2, $3) RETURNING id`
-	err = db.Conn.QueryRow(context.Background(), query, task.Title, task.Description, task.Completed).Scan(&task.ID)
+	query := `INSERT INTO tasks (title, description, completed, task_date, task_type) VALUES ($1, $2, $3) RETURNING id`
+	err = db.Conn.QueryRow(context.Background(), query, task.Title, task.Description, task.Completed, task.TaskDate, task.TaskType).Scan(&task.ID)
 	if err != nil {
 		http.Error(w, "Failed to create task: "+err.Error(), http.StatusInternalServerError) // Log the error message
 		return
@@ -79,8 +79,8 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Prepare SQL query to update the task in the database
-	query := `UPDATE tasks SET title=$1, description=$2, completed=$3 WHERE id=$4`
-	_, err = db.Conn.Exec(context.Background(), query, task.Title, task.Description, task.Completed, params["id"])
+	query := `UPDATE tasks SET title=$1, description=$2, completed=$3, task_date=$4, task_type=$5 WHERE id=$4`
+	_, err = db.Conn.Exec(context.Background(), query, task.Title, task.Description, task.Completed, task.TaskDate, task.TaskType, params["id"])
 	if err != nil {
 		http.Error(w, "Failed to update task", http.StatusInternalServerError)
 		return
