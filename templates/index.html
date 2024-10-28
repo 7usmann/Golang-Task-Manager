@@ -1,18 +1,37 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-    <title>Golang Task Manager</title>
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Welcome to the Golang Task Manager</h1>
-    <ul>
-        <li><a href="/tasks">View All Tasks</a></li>
-        <li><a href="/tasks/new">Create a New Task</a></li>
-        <li><a href="/tasks/{id}">View a Specific Task</a></li>
-    </ul>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <h1>Task Manager</h1>
+        </div>
+        <div class="navbar-right">
+            <button id="view-switch" onclick="switchView()">Month</button>
+            <input type="text" id="search-bar" placeholder="Search for a task..." onkeyup="searchTask()" />
+        </div>
+    </nav>
+
+    <!-- Calendar Container -->
+    <div class="calendar-container" id="calendar-container">
+        <!-- Calendar header with the month and navigation -->
+        <div class="calendar-header" id="calendar-header">
+            <!-- The JavaScript will dynamically populate the month and navigation buttons -->
+        </div>
+        
+        <!-- Calendar Grid -->
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- JavaScript will dynamically populate these cells -->
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+        
 </body>
 </html>

@@ -18,6 +18,7 @@ func main() {
 	r := mux.NewRouter()
 
 	// Route handlers
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/", handlers.HomePageHandler).Methods("GET")
 	r.HandleFunc("/tasks", handlers.GetTasks).Methods("GET")
 	r.HandleFunc("/tasks/{id}", handlers.GetTask).Methods("GET")
