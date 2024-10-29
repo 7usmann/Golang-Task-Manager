@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks for the Day</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="#" onclick="goToMainCalendar()"><h1>Task Manager</h1></a>
+        </div>
+        <div class="navbar-right">
+            <button id="view-switch" onclick="switchView()">Month</button>
+            <input type="text" id="search-bar" placeholder="Search for a task..." onkeyup="searchTask()" />
+        </div>
+    </nav>
+
+    <div id="task-container">
+        <div id="task-list" class="big-box">
+            <h2>Tasks for <span id="task-date"></span></h2>
+            <!-- Task items will be populated here by JavaScript -->
+            <ul id="tasks-list"></ul> <!-- This will be filled with task items dynamically -->
+        </div>
+        <div id="task-form" class="small-box">
+            <h3>Add a New Task</h3>
+            <form id="new-task-form">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required><br>
+        
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description"><br>
+        
+                <label for="task_type">Task Type:</label>
+                <select id="task_type" name="task_type" required>
+                    <option value="academia">Academia</option>
+                    <option value="work">Work</option>
+                    <option value="extracurricular">Extracurricular</option>
+                    <option value="other">Other</option>
+                </select><br>
+        
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/static/date.js"></script>
+</body>
+</html>

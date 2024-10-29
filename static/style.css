@@ -20,6 +20,7 @@ body {
 
 .navbar h1 {
     font-size: 1.5em;
+    color: aliceblue;
 }
 
 .navbar-right {
@@ -69,21 +70,6 @@ body {
     gap: 10px;
 }
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 columns for days of the week */
-    gap: 5px; /* Adjust spacing as needed */
-}
-
-.calendar-container.month-view div {
-    width: 100%;
-    height: 100px; /* Adjust height as necessary */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ddd; /* Optional for border styling */
-}
-
 
 .calendar-grid div {
     border: 1px solid #ddd;
@@ -120,4 +106,27 @@ body {
 
 .today {
     background-color: yellow;
+}
+
+
+
+#task-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.big-box, .small-box {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.big-box {
+    width: 70%;
+}
+
+.small-box {
+    width: 25%;
 }

@@ -1,6 +1,15 @@
+function goToMainCalendar() {
+    currentView = 'month';
+    renderMonthView(new Date());
+    document.getElementById('view-switch').innerText = 'Month';
+    renderNavigationBar();
+}
+
+
+
+
 let currentDate = new Date();
 let currentView = 'month';
-
 
 // Reset currentDate to today whenever switching views
 
@@ -67,10 +76,11 @@ function renderMonthView(date) {
 
         // Make each cell clickable
         dayCell.onclick = function () {
-            const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const formattedDate = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
             console.log(`Redirecting to /date/${formattedDate}`);
-            window.location.href = `/date/${formattedDate}`;
+            window.location.href = `/date/${formattedDate}`; // Redirect to /date/dd/mm/yyyy
         };
+
 
         // Highlight today's date
         if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
@@ -85,43 +95,59 @@ function renderMonthView(date) {
 function renderWeekView(startOfWeek) {
     const calendarGrid = document.getElementById('calendar-grid');
     calendarGrid.innerHTML = '';
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+
     for (let i = 0; i < 7; i++) {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
 
+        // Format date as dd/mm/yyyy
+        const dayFormatted = `${String(day.getDate()).padStart(2, '0')}/${String(day.getMonth() + 1).padStart(2, '0')}/${day.getFullYear()}`;
+        
         const dayCell = document.createElement('div');
-        dayCell.innerText = `${day.toDateString()}`;
+        dayCell.innerText = dayFormatted;
+
         dayCell.onclick = function () {
-            const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            console.log(`Redirecting to /date/${formattedDate}`);
-            window.location.href = `/date/${formattedDate}`;
+            // Use the same formatted date for the URL
+            console.log(`Redirecting to /date/${dayFormatted}`);
+            window.location.href = `/date/${dayFormatted}`;
         };
+
+        // Highlight today's date
         const today = new Date();
         if (day.getDate() === today.getDate() && day.getMonth() === today.getMonth() && day.getFullYear() === today.getFullYear()) {
             dayCell.classList.add('today');
         }
+        
         calendarGrid.appendChild(dayCell);
     }
 }
 
+
 // Function to render the day view
 function renderDayView(date) {
     const calendarGrid = document.getElementById('calendar-grid');
-    const year = date.getFullYear();
-    const month = date.getMonth();
     calendarGrid.innerHTML = '';
+
+    // Format date as dd/mm/yyyy
+    const dayFormatted = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+
     const dayCell = document.createElement('div');
-    dayCell.innerText = date.toDateString();
-    dayCell.classList.add('today');
+    dayCell.innerText = dayFormatted;
+
     dayCell.onclick = function () {
-        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(currentDate).padStart(2, '0')}`;
-        console.log(`Redirecting to /date/${formattedDate}`);
-        window.location.href = `/date/${formattedDate}`;
+        console.log(`Redirecting to /date/${dayFormatted}`);
+        window.location.href = `/date/${dayFormatted}`; // Redirect to /date/dd/mm/yyyy
     };
+
+    // Highlight today's date
+    const today = new Date();
+    if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
+        dayCell.classList.add('today');
+    }
+
     calendarGrid.appendChild(dayCell);
 }
+
 
 // Helper to get the start of the week (Monday)
 function getStartOfWeek(date) {
@@ -170,3 +196,5 @@ window.onload = () => {
     renderNavigationBar();
     renderMonthView(currentDate); // Start with month view
 };
+
+
