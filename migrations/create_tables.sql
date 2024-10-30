@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 
 INSERT INTO tasks (title, description, completed, task_date, task_type)
-VALUES ('Test Task', 'This is a test task', false, '2024-10-15', 'work');
+VALUES ('Dummy Task', 'This is a Dummy task', false, '2024-10-15', 'work');
 

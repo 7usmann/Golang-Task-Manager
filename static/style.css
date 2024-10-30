@@ -64,11 +64,7 @@ body {
     margin-bottom: 20px;
 }
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
+
 
 
 .calendar-grid div {
@@ -104,9 +100,6 @@ body {
     justify-content: center;
 }
 
-.today {
-    background-color: yellow;
-}
 
 
 
@@ -129,4 +122,63 @@ body {
 
 .small-box {
     width: 25%;
+}
+
+.update-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.day-number {
+    font-weight: bold;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+/* Adjust task title styling */
+.task-title {
+    background-color: #f7f7f7;   /* Light background for better visibility */
+    padding: 3px 5px;            /* Slight padding for compact look */
+    margin: 3px 0;               /* Minimal margin between tasks */
+    font-size: 0.85em;           /* Smaller font size */
+    border-radius: 3px;          /* Rounded corners */
+    border: 1px solid #ddd;      /* Light border for separation */
+    white-space: nowrap;         /* Prevents text from wrapping */
+    overflow: hidden;            /* Ensures overflow is hidden */
+    text-overflow: ellipsis;     /* Adds "..." for overflow text */
+}
+
+/* Calendar grid styling */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for days of the week */
+    gap: 10px;
+}
+
+/* Day cell styling */
+.day-cell {
+    position: relative;
+    padding: 5px;
+    border: 1px solid #ddd;
+    min-height: 100px;           /* Set a minimum height for cells */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Task container styling for each day cell */
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 80px;            /* Limit height to fit a few tasks */
+    overflow-y: auto;            /* Enable vertical scroll if tasks overflow */
+    width: 100%;
+}
+
+/* Styling today's date */
+.today {
+    background-color: #ffff88;   /* Highlight color for today's cell */
+    border: 1px solid #ccc;      /* Border to make it stand out */
 }

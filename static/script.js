@@ -14,9 +14,10 @@ let currentView = 'month';
 // Reset currentDate to today whenever switching views
 
 // Reset currentDate to today whenever switching views
+
+// Navigation function to update date based on view mode and direction
 function switchView() {
-    currentDate = new Date(); // Resets to today each time view changes
-    console.log("Switch view triggered");  // Add this line to confirm it's called
+    currentDate = new Date(); // Reset to today each time view changes
 
     if (currentView === 'month') {
         currentView = 'week';
@@ -28,29 +29,62 @@ function switchView() {
         document.getElementById('view-switch').innerText = 'Day';
     } else {
         currentView = 'month';
-        renderMonthView(currentDate);
+        refreshCalendarGrid(); // Fetch tasks when switching back to month view
         document.getElementById('view-switch').innerText = 'Month';
     }
     renderNavigationBar();
 }
 
 
-// Navigation function to update date based on view mode and direction
-function navigateView(direction) {
-    if (currentView === 'month') {
-        currentDate.setMonth(currentDate.getMonth() + direction);
-        renderMonthView(currentDate);
-    } else if (currentView === 'week') {
-        currentDate.setDate(currentDate.getDate() + direction * 7);
-        renderWeekView(currentDate);
-    } else if (currentView === 'day') {
-        currentDate.setDate(currentDate.getDate() + direction);
-        renderDayView(currentDate);
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+
+    try {
+        currentTasks = await fetchTasksForMonth(year, month);
+        console.log("Fetched tasks for month:", currentTasks);
+        renderMonthView(currentDate, currentTasks);
+    } catch (error) {
+        console.error("Error fetching tasks for month:", error);
     }
-    renderNavigationBar();
+});
+
+async function fetchTasksForMonth(year, month) {
+    console.log(`Fetching tasks from URL: /api/tasks/month/${year}/${month}`);
+    try {
+        const response = await fetch(`/api/tasks/month/${year}/${month}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching tasks:", error);
+        return [];
+    }
 }
 
-function renderMonthView(date) {
+async function refreshCalendarGrid() {1
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const timestamp = new Date().getTime(); // Cache-busting timestamp
+
+    try {
+        const tasks = await fetchTasksForMonth(year, month);
+        renderMonthView(currentDate, tasks);
+    } catch (error) {
+        console.error("Error refreshing calendar grid:", error);
+    }
+}
+
+
+
+// Modified `renderMonthView` to accept tasks for easier rendering
+function renderMonthView(date, tasks = []) {
+    // Ensure tasks is an array, even if null or undefined
+    tasks = tasks || [];
+
     const calendarGrid = document.getElementById('calendar-grid');
     calendarGrid.innerHTML = ''; // Clear existing content
     calendarGrid.className = 'calendar-grid'; // Ensure the grid layout is applied
@@ -69,84 +103,153 @@ function renderMonthView(date) {
         calendarGrid.appendChild(emptyCell);
     }
 
-    // Fill the calendar with days of the month
+    // Fill the calendar with days of the month and add tasks to their relevant cells
     for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement('div');
-        dayCell.innerText = day;
+        dayCell.classList.add('day-cell');
+        dayCell.innerHTML = `<span class="day-number">${day}</span>`;
 
-        // Make each cell clickable
+        // Filter tasks for this specific day
+        const dayTasks = tasks.filter(task => {
+            const taskDate = new Date(task.task_date);
+            return (
+                taskDate.getDate() === day &&
+                taskDate.getMonth() === month &&
+                taskDate.getFullYear() === year
+            );
+        });
+
+        // Create a div to hold task titles
+        const tasksDiv = document.createElement('div');
+        tasksDiv.className = 'tasks-container';
+
+        // Display each task title in a smaller div within the tasks container
+        dayTasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-title';
+            taskDiv.textContent = task.title;
+            tasksDiv.appendChild(taskDiv);
+        });
+
+        dayCell.appendChild(tasksDiv);
+
+        // Make each cell clickable to navigate to the specific date
         dayCell.onclick = function () {
             const formattedDate = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
-            console.log(`Redirecting to /date/${formattedDate}`);
-            window.location.href = `/date/${formattedDate}`; // Redirect to /date/dd/mm/yyyy
+            window.location.href = `/date/${formattedDate}`;
         };
 
-
         // Highlight today's date
-        if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+        if (
+            day === new Date().getDate() &&
+            month === new Date().getMonth() &&
+            year === new Date().getFullYear()
+        ) {
             dayCell.classList.add('today');
         }
         calendarGrid.appendChild(dayCell);
     }
 }
-
 
 // Function to render the week view
-function renderWeekView(startOfWeek) {
+async function renderWeekView(startOfWeek) {
+    const tasks = await fetchTasksForWeek(startOfWeek);
     const calendarGrid = document.getElementById('calendar-grid');
-    calendarGrid.innerHTML = '';
+    calendarGrid.innerHTML = ''; // Clear grid
 
     for (let i = 0; i < 7; i++) {
-        const day = new Date(startOfWeek);
-        day.setDate(startOfWeek.getDate() + i);
+        const dayDate = new Date(startOfWeek);
+        dayDate.setDate(startOfWeek.getDate() + i);
 
-        // Format date as dd/mm/yyyy
-        const dayFormatted = `${String(day.getDate()).padStart(2, '0')}/${String(day.getMonth() + 1).padStart(2, '0')}/${day.getFullYear()}`;
-        
+        const dayFormatted = `${String(dayDate.getDate()).padStart(2, '0')}/${String(dayDate.getMonth() + 1).padStart(2, '0')}/${dayDate.getFullYear()}`;
+
         const dayCell = document.createElement('div');
-        dayCell.innerText = dayFormatted;
+        dayCell.classList.add('day-cell');
+        dayCell.innerHTML = `<span class="day-number">${dayFormatted}</span>`;
 
-        dayCell.onclick = function () {
-            // Use the same formatted date for the URL
-            console.log(`Redirecting to /date/${dayFormatted}`);
-            window.location.href = `/date/${dayFormatted}`;
-        };
+        // Event listener for redirection
+        dayCell.addEventListener('click', function () {
+            const formattedDate = `${String(dayDate.getDate()).padStart(2, '0')}/${String(dayDate.getMonth() + 1).padStart(2, '0')}/${dayDate.getFullYear()}`;
+            console.log(`Redirecting to: /date/${formattedDate}`);
+            window.location.href = `/date/${formattedDate}`;
+        });
 
-        // Highlight today's date
-        const today = new Date();
-        if (day.getDate() === today.getDate() && day.getMonth() === today.getMonth() && day.getFullYear() === today.getFullYear()) {
-            dayCell.classList.add('today');
-        }
+        // Filter tasks for this specific day
+        const dayTasks = tasks.filter(task => {
+            const taskDate = new Date(task.task_date);
+            return (
+                taskDate.getDate() === dayDate.getDate() &&
+                taskDate.getMonth() === dayDate.getMonth() &&
+                taskDate.getFullYear() === dayDate.getFullYear()
+            );
+        });
+
+        const tasksDiv = document.createElement('div');
+        tasksDiv.className = 'tasks-container';
+
+        // Display each task title in a smaller div within the tasks container
+        dayTasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-title';
+            taskDiv.textContent = task.title;
+            tasksDiv.appendChild(taskDiv);
+        });
+
         
+
+        dayCell.appendChild(tasksDiv);
         calendarGrid.appendChild(dayCell);
     }
 }
+
+
 
 
 // Function to render the day view
-function renderDayView(date) {
-    const calendarGrid = document.getElementById('calendar-grid');
-    calendarGrid.innerHTML = '';
+async function renderDayView(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
 
-    // Format date as dd/mm/yyyy
-    const dayFormatted = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    let tasks = await fetchTasksForDay(year, month, day);
+    tasks = tasks || [];  // Default to an empty array if tasks is null or undefined
+
+    const calendarGrid = document.getElementById('calendar-grid');
+    calendarGrid.innerHTML = ''; // Clear existing content
+
+    const dayFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
 
     const dayCell = document.createElement('div');
-    dayCell.innerText = dayFormatted;
+    dayCell.classList.add('day-cell');
+    dayCell.innerHTML = `<span class="day-number">${dayFormatted}</span>`;
 
+    const tasksDiv = document.createElement('div');
+    tasksDiv.className = 'tasks-container';
+
+    // Add click event to the day cell for redirection
     dayCell.onclick = function () {
         console.log(`Redirecting to /date/${dayFormatted}`);
-        window.location.href = `/date/${dayFormatted}`; // Redirect to /date/dd/mm/yyyy
+        window.location.href = `/date/${dayFormatted}`;
     };
 
-    // Highlight today's date
+    // Populate tasks within the day cell
+    tasks.forEach(task => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task-title';
+        taskDiv.textContent = task.title;
+        tasksDiv.appendChild(taskDiv);
+    });
+
+    // Highlight today's date if it matches
     const today = new Date();
     if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
         dayCell.classList.add('today');
     }
 
+    dayCell.appendChild(tasksDiv);
     calendarGrid.appendChild(dayCell);
 }
+
 
 
 // Helper to get the start of the week (Monday)
@@ -186,15 +289,70 @@ function renderNavigationBar() {
     calendarHeader.appendChild(nextButton);
 }
 
+function navigateView(direction) {
+    if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+        refreshCalendarGrid();
+    } else if (currentView === 'week') {
+        currentDate.setDate(currentDate.getDate() + direction * 7);
+        renderWeekView(getStartOfWeek(currentDate));
+    } else if (currentView === 'day') {
+        currentDate.setDate(currentDate.getDate() + direction);
+        renderDayView(currentDate);
+    }
+    renderNavigationBar();
+}
+
 // Helper function to format the month and year display
 function getMonthYearDisplay(date) {
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
 }
 
+async function fetchTasksForWeek(startDate) {
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    const start = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+    const end = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+
+    try {
+        const response = await fetch(`/api/tasks/week?start=${start}&end=${end}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data || []; // Ensure an empty array if data is null or undefined
+    } catch (error) {
+        console.error("Error fetching tasks for week:", error);
+        return []; // Return an empty array on error
+    }
+}
+
+
+async function fetchTasksForDay(year, month, day) {
+    try {
+        const response = await fetch(`/api/tasks/day/${year}/${month}/${day}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching tasks for day:", error);
+        return [];
+    }
+}
+
+
+
+
 // Initialize on load
 window.onload = () => {
     renderNavigationBar();
     renderMonthView(currentDate); // Start with month view
+    refreshCalendarGrid()
 };
+window.addEventListener("pageshow", () => {
+    refreshCalendarGrid();
+});
 
 
