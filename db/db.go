@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -14,7 +15,6 @@ var Conn *pgx.Conn
 
 // Initialize the PostgreSQL connection
 func InitDB() error {
-
 	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
@@ -23,13 +23,17 @@ func InitDB() error {
 	dbURL := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName)
 
 	var err error
-	Conn, err = pgx.Connect(context.Background(), dbURL)
-	if err != nil {
-		log.Println("Unable to connect to database:", err)
-		return err
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		Conn, err = pgx.Connect(context.Background(), dbURL)
+		if err == nil {
+			log.Println("Connected to PostgreSQL database!")
+			return nil
+		}
+		log.Printf("Unable to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+		time.Sleep(2 * time.Second) // wait before retrying
 	}
-	log.Println("Connected to PostgreSQL database!")
-	return nil
+	return fmt.Errorf("could not connect to database after %d attempts: %v", maxRetries, err)
 }
 
 // Close the PostgreSQL connection
