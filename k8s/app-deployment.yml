@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: golang-task-manager
-        image: your-dockerhub-username/golang-task-manager:latest
+        image: 7usman/golang-task-manager:latest
         ports:
         - containerPort: 8080
         env:
