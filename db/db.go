@@ -14,8 +14,16 @@ var Conn *pgx.Conn
 
 // Initialize the PostgreSQL connection
 func InitDB() error {
+
+	dbHost := os.Getenv("DB_HOST")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	dbURL := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName)
+
 	var err error
-	Conn, err = pgx.Connect(context.Background(), "postgres://postgres:7usmann@localhost:5432/task_manager")
+	Conn, err = pgx.Connect(context.Background(), dbURL)
 	if err != nil {
 		log.Println("Unable to connect to database:", err)
 		return err
